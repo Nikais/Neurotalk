@@ -1,0 +1,22 @@
+tasks:
+  echo: # must be the name returned by the overworld
+    onboard_world: TelegramEchoOnboardWorld
+    task_world: TelegramEchoTaskWorld
+    timeout: 180
+    agents_required: 1
+  onboard_data: # must be the name returned by the overworld
+    onboard_world: TelegramOnboardDataOnboardWorld
+    task_world: TelegramOnboardDataTaskWorld
+    timeout: 180
+    agents_required: 1
+  chat: # must be the name returned by the overworld
+    onboard_world: TelegramChatOnboardWorld
+    task_world: TelegramChatTaskWorld
+    timeout: 10
+    agents_required: 2
+task_name: overworld_demo
+world_module: tasks.overworld_demo.worlds
+overworld: TelegramOverworld
+max_workers: 30
+opt:
+  debug: True

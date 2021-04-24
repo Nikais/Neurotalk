@@ -1,0 +1,8 @@
+# Ignore all log files
+*.log
+
+# Ignore heroku binaries
+/telegram/core/heroku
+
+# Ignore Idea IDE files
+/.idea
