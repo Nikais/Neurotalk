@@ -82,7 +82,7 @@ class TelegramAgent(ChatServiceAgent):
             act.get('persona_id', None),
         )
         try:
-            mid = resp['result']['message_id']
+            mid = resp['message_id']
             if mid not in self.observed_packets:
                 self.observed_packets[mid] = act
         except Exception:

@@ -47,7 +47,7 @@ class Parser(ParlaiParser):
                  'the level the more that gets logged. values are 0-50',
         )
         telegram.add_argument(
-            '--force-page-token',
+            '--force-telegram-bot-token',
             dest='force_telegram_bot_token',
             action='store_true',
             help='override the page token stored in the cache for a new one',

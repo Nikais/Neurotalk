@@ -6,7 +6,6 @@ Contains implementation of the TelegramManager, which helps run ParlAI via Teleg
 import logging
 import os
 
-import requests
 import parlai.chat_service.utils.logging as log_utils
 from parlai.chat_service.core.chat_service_manager import ChatServiceManager
 from parlai.core.agents import create_agent
@@ -15,6 +14,7 @@ from parlai.utils.io import PathManager
 import telegram.core.server as server_utils
 from telegram.agents import TelegramAgent
 from telegram.core.socket import TelegramServiceMessageSocket
+from telegram.message_sender import MessageSender
 
 
 class TelegramManager(ChatServiceManager):
@@ -22,50 +22,6 @@ class TelegramManager(ChatServiceManager):
     Manages interactions between agents on telegram as well as direct interactions
     between agents and the telegram overworld.
     """
-
-    class MessageSender(ChatServiceManager.ChatServiceMessageSender):
-        """
-        MessageSender is a wrapper around requests that simplifies the
-        process of sending content.
-        """
-
-        def __init__(self, secret_token: str):
-            self.token = secret_token
-
-        def send_read(self, receiver_id: int):
-            pass
-
-        def send_chat_action(self, chat_id, action):
-            api_address = f'https://api.telegram.org/bot{self.token}/sendChatAction'
-            message = {'chat_id': chat_id, 'action': action}
-            requests.post(api_address, json=message)
-
-        def typing_on(self, receiver_id: int, persona_id=None):
-            """
-            Send typing on msg to agent at receiver_id.
-            """
-            self.send_chat_action(receiver_id, 'typing')
-
-        def send_message(self, chat_id, text):
-            """
-            Sends a message directly to telegram.
-            """
-            api_address = f'https://api.telegram.org/bot{self.token}/sendMessage'
-            payload = {
-                'chat_id': chat_id,
-                'text': text
-            }
-            response = requests.post(api_address, json=payload)
-            result = response.json()
-            log_utils.print_and_log(
-                logging.INFO, f'"Telegram response from message send: {result}"'
-            )
-            return result
-
-        def set_webhook(self, url: str):
-            api_address = f'https://api.telegram.org/bot{self.token}/setWebhook'
-            message = {'url': url}
-            requests.post(api_address, json=message)
 
     EXIT_STR = 'exit'
 
@@ -108,7 +64,7 @@ class TelegramManager(ChatServiceManager):
 
     def _handle_bot_read(self, agent_id):
         self.sender.send_read(agent_id)
-        self.sender.typing_on(agent_id)
+        self.sender.typing_to(agent_id)
 
     def _handle_webhook_event(self, event):
         if 'message' in event:
@@ -170,11 +126,9 @@ class TelegramManager(ChatServiceManager):
         """
         self.should_load_model = self.config['additional_args'].get('load_model', True)
 
-    def restructure_message(self, message):  # Todo Test it
+    def restructure_message(self, message):
         """
         Use this function to restructure the message into the provided format.
-
-        returns the appropriate new_message.
         """
         message = message['message']
         message['mid'] = message.pop('message_id')
@@ -227,7 +181,7 @@ class TelegramManager(ChatServiceManager):
         )
 
         self.app_token = self.get_app_token()
-        self.sender = TelegramManager.MessageSender(self.app_token)
+        self.sender = MessageSender(self.app_token)
         self.sender.set_webhook(f'{self.server_url}/webhook')
 
         # Set up receive
