@@ -8,6 +8,6 @@ Fork this repository and complete necessary setup with command
 ### Launch task
 To start Telegram bot run command bellow:  
 ```
-python -m telegram --config /tasks/chatbot/config.yml
+python -m telegram --config-path tasks/chatbot/config.yml
 ```  
 Follow the instructions in console to complete setup
